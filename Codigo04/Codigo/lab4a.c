@@ -1,25 +1,17 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-
-typedef struct _graph{
-    int nodes;
-    int branch;
-    int **adjM;
-    int *grade;
-    float density;
-} Graph;
+#include"graphM.h"
 
 int main(int argc, char *argv[]) 
 {
     FILE *fp;
     char *fileOut;
-    Graph *graph;
+    Graph *g;
     int n;
     int i = 0;
     int j = 0;
-    int maxGrade = 0;
-
+    int aux = 0;
 
     if(argc < 2){
         fprintf(stderr, "USAGE:\n\t %s <input file name>\n", argv[0]);
@@ -32,69 +24,29 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    graph = (Graph*) malloc(sizeof(Graph));
-
-    if(graph ==  NULL) {
-        fprintf(stderr, "ERROR: memory error\n");
-        return 3;
-    }
 
     /* reading adjacency matrix from file */
 
-    fscanf(fp, "%d", &graph->nodes);
+    fscanf(fp, "%d", &n);
 
-    if(graph->nodes <= 0) {
-        fprintf(stderr, "ERROR: invalid n (node number): %d\n", graph->nodes);
+    if(n <= 0) {
+        fprintf(stderr, "ERROR: invalid n (node number): %d\n", n);
         fclose(fp);
         return 4;
     }
 
-    n = graph->nodes;
-    graph->density = 0;
-
-    graph->adjM = (int**) malloc(n * sizeof(int*));
-    for(i = 0; i < n; i++)
-        graph->adjM[i] = (int*) malloc(n * sizeof(int));
-    
-    if(graph->adjM == NULL) {
-        fprintf(stderr, "ERROR: memory error\n");
-        return 3;
-    }
-
-    graph->grade = (int*) malloc(sizeof(int) * n);
-    for(i = 0; i < n; i++)
-        graph->grade[i] = 0;
+    g = graphInit(n);
 
     for(i = 0; i < n; i++) {
-        for(j = 0; j < n; j++)
-            fscanf(fp, "%d", &graph->adjM[i][j]);
+        for(j = 0; j < n ; j++) {
+            fscanf(fp, "%d", &aux);
+            insertEdge(g, i, j, aux);
+        }
     }
     fclose(fp);
 
-    /* calculating graph density, max node grade
-     * and total number of branches */
-
-    graph->branch = 0;
-    for(i = 0; i < n; i++) {
-        for(j = 0; j <= i; j++) {
-            if(graph->adjM[i][j] >= 1){
-                graph->density += 1.;
-                graph->branch++;
-                graph->grade[i]++;
-                graph->grade[j]++;
-            }
-        }
-    }
-    graph->density = graph->density * 2 / ((float) graph->nodes);
-
-    maxGrade = 0;
-    for(i = 0; i < n; i++) {
-        if(graph->grade[i] > maxGrade)
-            maxGrade = graph->grade[i];
-    }
-
-    fprintf(stdout, "Graph density: %f\n", graph->density);
-    fprintf(stdout, "Max grade: %d\n", maxGrade);
+    fprintf(stdout, "Graph density: %f\n", getDensity(g));
+    fprintf(stdout, "Max grade: %d\n", getMaxGrade(g));
 
     /* Writing to output file 
      * [number of nodes]
@@ -110,12 +62,12 @@ int main(int argc, char *argv[])
 
     fp = fopen(fileOut, "w");
 
-    fprintf(fp, "%d\n%d\n", graph->nodes, graph->branch);
+    fprintf(fp, "%d\n%d\n", n, getBranches(g));
 
     for(i = 0; i < n; i++){
         for(j = 0; j <= i; j++){
-            if(graph->adjM[i][j] >= 1)
-                fprintf(fp, "%d %d %d\n", j, i, graph->adjM[i][j]);
+            if(getBranch(g, i, j) >= 1)
+                fprintf(fp, "%d %d %d\n", j, i, getBranch(g, i, j));
         }
     }
 
@@ -124,15 +76,8 @@ int main(int argc, char *argv[])
     
     /* freeing memory */
     
-    for(i = 0; i < n; i++)
-        free(graph->adjM[i]);
-    free(graph->adjM);
-    free(graph->grade);
-    free(graph);
+    destroyGraph(g);
     free(fileOut);
-
-
-
 
     return 0;
 }
