@@ -82,7 +82,7 @@ LinkedList * initLinkedList(void)
  *  Return value:
  *    None
  */
-void freeLinkedList(LinkedList * first, void (* freeItemFnt)(Item))
+void freeLinkedList(LinkedList * first, freeItemFnt freeItem)
 {
   LinkedList * next;
   LinkedList * aux;
@@ -94,14 +94,35 @@ void freeLinkedList(LinkedList * first, void (* freeItemFnt)(Item))
     next = aux->next;
 
     /* Free current item                                          */
-/*    freeItemFnt(aux->this);*/
-free(aux->this);
+    freeItem(aux->this);
+    //free(aux->this);
 
     /* Free current node                                          */
     free(aux);
   }
 
   return;
+}
+
+
+void freeLinkedListNode(LinkedList *node, freeItemFnt freeItem) {
+    if(node != NULL) {
+        freeItem(node->this);
+        free(node);
+    }
+
+    return;
+}
+
+void deleteNextNode(LinkedList *prevNode, freeItemFnt freeItem) {
+    LinkedList *aux;
+    if(prevNode->next != NULL) {
+        aux = prevNode->next;
+        prevNode->next = aux->next;
+        freeItem(aux->this);
+        free(aux);
+    }
+    return;
 }
 
 
@@ -251,7 +272,7 @@ LinkedList * insertUnsortedLinkedList(LinkedList * next, Item this)
 LinkedList * insertSortedLinkedList(LinkedList * first, 
                            Item item, 
                            int (* comparisonItemFnt)
-                           (Item item1, Item item2)
+                           (Item item1, Item item2),
                            int * err)
 {
 

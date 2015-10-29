@@ -61,6 +61,8 @@
  */
 typedef struct LinkedListStruct LinkedList;
 
+typedef void (* freeItemFnt)(Item);
+
 
 
 /*
@@ -96,7 +98,22 @@ LinkedList * initLinkedList(void);
  *  Return value:
  *    None
  */
-void freeLinkedList(LinkedList * first, void (* freeItemFnt)(Item));
+void freeLinkedList(LinkedList * first, freeItemFnt freeItem);
+
+/*
+ * frees a single node from a list
+ *
+ * carefull!
+ */
+
+void freeLinkedListNode(LinkedList *node, freeItemFnt freeItem);
+
+/*
+ * removes the next node from the linked list
+ * while keeping whole list linked
+ */
+
+void deleteNextNode(LinkedList *prevNode, freeItemFnt freeItem);
 
 
 
@@ -115,6 +132,7 @@ void freeLinkedList(LinkedList * first, void (* freeItemFnt)(Item));
  *    Returns the length of the linked list.
  */
 int lengthLinkedList(LinkedList * first);
+
 
 
 
@@ -208,7 +226,7 @@ LinkedList * insertUnsortedLinkedList(LinkedList * next, Item this);
 LinkedList * insertSortedLinkedList(LinkedList * first, 
                            Item item, 
                            int (* comparisonItemFnt)
-                           (Item item1, Item item2)
+                           (Item item1, Item item2),
                            int * err);
 
 
