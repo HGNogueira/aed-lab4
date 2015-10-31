@@ -48,19 +48,28 @@ GraphL *graphInit(int nodes) {
 
 void insertEdge(GraphL *g, int v, int w, int value){
     Edge *e;
+    e = (Edge *) malloc(sizeof(Edge));
 
     e->v = v;
     e->w = w;
     e->value = value;
 
 
-    g->adjL[v] = insertUnsortedLinkedList(g->adjL[v], e);
+    g->adjL[v] = insertUnsortedLinkedList(g->adjL[v], (Item) e);
+
+    e = (Edge *) malloc(sizeof(Edge));
+
+    e->v = w;
+    e->w = v;
+    e->value = value;
+
+
+    g->adjL[w] = insertUnsortedLinkedList(g->adjL[w], e);
     
     return;
 }
 
 void deleteEdge(GraphL *g, int v, int w){
-    int i = 0;
     Edge *e;
     LinkedList *aux;
     
@@ -113,4 +122,36 @@ void destroyGraph(GraphL *g) {
 
     free(g->adjL);
     free(g);
+}
+
+LinkedList *getEdgesOfNode(GraphL *g, int v) {
+    LinkedList *aux = g->adjL[v];
+    LinkedList *edges;
+    Edge *eAux, *e;
+
+    edges = initLinkedList();
+
+    while(aux != NULL) {
+        eAux = (Edge *) getItemLinkedList(aux);
+        e = (Edge *) malloc(sizeof(Edge));
+        e->v = eAux->v;
+        e->w = eAux->w;
+        e->value = eAux->value;
+        edges = insertUnsortedLinkedList(edges, (Item) e);
+        aux = getNextNodeLinkedList(aux);
+    }
+
+    return edges;
+}
+
+int getOrigNode(Edge *e) {
+    return e->v;
+}
+
+int getDestNode(Edge *e) {
+    return e->w;
+}
+
+int getValueEdge(Edge *e) {
+    return e->value;
 }

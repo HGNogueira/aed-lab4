@@ -95,7 +95,6 @@ void freeLinkedList(LinkedList * first, freeItemFnt freeItem)
 
     /* Free current item                                          */
     freeItem(aux->this);
-    //free(aux->this);
 
     /* Free current node                                          */
     free(aux);
